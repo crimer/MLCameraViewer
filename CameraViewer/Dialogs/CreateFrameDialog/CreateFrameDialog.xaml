@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="CameraViewer.Dialogs.CreateFrameDialog.CreateFrameDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             mc:Ignorable="d" 
+             d:DesignWidth="300">
+    <Grid Margin="16">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" 
+                   Text="Создать камеру"
+                   HorizontalAlignment="Center"
+                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+        <TextBox wpf:HintAssist.Hint="Название" 
+                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"                 
+                 Margin="0 6 0 0"
+                 FontSize="18"
+                 Grid.Row="1"
+                 Text="{Binding Name, Mode=TwoWay}">
+        </TextBox>
+        <TextBox wpf:HintAssist.Hint="Ip адрес" 
+                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                 Margin="0 8 0 0"
+                 FontSize="16" 
+                 Grid.Row="2"
+                 Text="{Binding Ip, Mode=TwoWay}">
+        </TextBox>
+        <TextBox wpf:HintAssist.Hint="Порт" 
+                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                 Margin="0 8 0 0"
+                 FontSize="16" 
+                 PreviewTextInput="NumberValidationTextBox"
+                 x:Name="Port"
+                 Grid.Row="3"
+                 Text="{Binding Port, Mode=TwoWay}">
+        </TextBox>
+        <StackPanel Orientation="Horizontal" 
+                    Grid.Row="4" 
+                    HorizontalAlignment="Center"
+                    Margin="0 16 0 0">
+            
+            <Button IsDefault="True" 
+                    Content="Создать"
+                    Style="{DynamicResource MaterialDesignRaisedLightButton}"
+                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}" 
+                    CommandParameter="true"/>
+            
+            <Button IsCancel="True" 
+                    Margin="8 0 0 0" 
+                    Content="Отмена"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}" 
+                    CommandParameter="false"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
