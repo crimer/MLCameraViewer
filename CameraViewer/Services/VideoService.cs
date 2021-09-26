@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using AForge.Video;
 using AForge.Video.DirectShow;
 using CameraViewer.Models;
 
@@ -10,17 +8,20 @@ namespace CameraViewer.Services
     public class VideoService
     {
         private FilterInfoCollection _videoDevicesList;
-        public Dictionary<Guid, Camera> Cameras;
-
-        private IVideoSource _videoSource;
-        
         
         public VideoService()
         {
+            _videoDevicesList = new FilterInfoCollection(FilterCategory.VideoInputDevice);
         }
 
-        
+        public List<WebCameraInfo> GetCameras()
+        { 
+            var webCameraInfos = new List<WebCameraInfo>();
 
-
+            foreach (FilterInfo camera in _videoDevicesList)
+                webCameraInfos.Add(new WebCameraInfo(camera.Name, camera.MonikerString));
+            
+            return webCameraInfos;
+        }
     }
 }

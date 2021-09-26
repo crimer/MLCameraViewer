@@ -30,8 +30,6 @@ namespace CameraViewer.Pages.Home
         private bool _isIpCameraSource;
         private bool _isWebcamSource;
 
-        private DateTime? _firstFrameTime;
-
         #endregion
         public BitmapImage BitmapImage { get => _image; set { Set(ref _image, value); } }
         public ObservableCollection<Camera> CamerasCollection { get; set; }
@@ -39,7 +37,7 @@ namespace CameraViewer.Pages.Home
         private readonly AlertDialog _alertDialog;
         private readonly CreateFrameDialog _createFrameDialog;
         private bool _frameCreationParameterResult;
-        public ObservableCollection<FilterInfo> VideoDevices { get; set; }
+        public ObservableCollection<WebCameraInfo> WebCameraCollections { get; set; }
         public ICommand OpenCreateFrameDialogCommand { get; private set; }
         public ICommand ConnectToCameraCommand { get; private set; }
         public ICommand DisconnectToCameraCommand { get; private set; }
@@ -56,17 +54,14 @@ namespace CameraViewer.Pages.Home
         {
             _logger = logger;
             _videoService = videoService;
-            
+
+            CamerasCollection = new ObservableCollection<Camera>();
+            WebCameraCollections = new ObservableCollection<WebCameraInfo>(_videoService.GetCameras());
             
             OpenCreateFrameDialogCommand = new RelayCommand(OpenCreateFrameDialog);
             ConnectToCameraCommand = new RelayCommand<object>(ConnectToCamera);
             DisconnectToCameraCommand = new RelayCommand<object>(DisconnectToCamera);
-            // StartRecordingCommand = new RelayCommand(StartRecording);
-            // StopRecordingCommand = new RelayCommand(StopRecording);
-            // SaveSnapshotCommand = new RelayCommand(SaveSnapshot);
-            
-            // VideoDevices = _videoService.GetDevices();
-            CamerasCollection = new ObservableCollection<Camera>();
+
             _alertDialog = new AlertDialog();
             _createFrameVM = new CreateFrameVM();
             _createFrameDialog = new CreateFrameDialog
@@ -79,6 +74,7 @@ namespace CameraViewer.Pages.Home
         {
             var camera = (Camera)obj;
             camera.Handler.Disconnect();
+            CamerasCollection.Remove(camera);
         }
 
         private void ConnectToCamera(object obj)
@@ -86,10 +82,7 @@ namespace CameraViewer.Pages.Home
             var camera = (Camera)obj;
             camera.Handler.Connect(camera);
         }
-
         
-       
-
         /// <summary>
         /// Открытие диалога создания фрейма
         /// </summary>
@@ -112,12 +105,10 @@ namespace CameraViewer.Pages.Home
                 if(!isValid)
                     return;
 
-                var camera = new Camera().Create(_createFrameVM.Name, _createFrameVM.Ip, _createFrameVM.Port);
+                var camera = new Camera(_createFrameVM.Name, _createFrameVM.Ip, _createFrameVM.Port);
                 
-                var t = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 
-                camera.MonikerString = t[0].MonikerString;
-                //camera.Handler.OnAcceptFrame += VideoServiceOnOnAcceptFrame;
+                camera.MonikerString = WebCameraCollections[0].CameraMonikerString;
                 CamerasCollection.Add(camera);
             }
             catch (Exception ex)

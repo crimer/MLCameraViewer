@@ -4,7 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:media="OzBluetoothHeadsetButtonListener_WPF"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         mc:Ignorable="d"
@@ -48,45 +47,58 @@
                         <!-- Camera Items -->
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
-                                    <materialDesign:Card Width="420" Height="300">
-                                        <Grid Margin="5">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="*" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-   
-                                            <TextBlock
-                                                Grid.Row="0"
-                                                Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                                Text="{Binding Name}" />
-            
-                                            <Border Grid.Row="1"
-                                                    BorderBrush="Black"
-                                                    Margin=" 0 10" 
-                                                    BorderThickness="1">
-                                                <Image Source="{Binding BitmapImage}"/>
-                                            </Border>
-            
-                                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                                <Button Style="{StaticResource MaterialDesignRaisedLightButton}"
-                                                        HorizontalAlignment="Left"
-                                                        Command="{Binding ElementName=CameraScrollViewer, Path = DataContext.ConnectToCameraCommand}"  
-                                                        CommandParameter="{Binding .}"
-                                                        VerticalAlignment="Bottom"
-                                                        Content="Подключиться"/>
-                                                
-                                                <Button Style="{StaticResource MaterialDesignRaisedLightButton}"
-                                                        HorizontalAlignment="Right"
-                                                        Command="{Binding ElementName=CameraScrollViewer, Path = DataContext.DisconnectToCameraCommand}"  
-                                                        CommandParameter="{Binding .}"
-                                                        VerticalAlignment="Bottom"
-                                                        Content="Отключиться"/>
+                                <GroupBox
+                                    Width="420" Height="300"
+                                    Style="{DynamicResource MaterialDesignCardGroupBox}"
+                                    Margin="16">
+                                    <GroupBox.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
+                                                Orientation="Horizontal">
+                                                <materialDesign:PackIcon
+                                                    Kind="Camera"
+                                                    Height="32"
+                                                    Width="32"
+                                                    VerticalAlignment="Center" />
+                                                <TextBlock
+                                                    DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type GroupBox}}}"
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                                    Text="{Binding Name}" />
                                             </StackPanel>
+                                        </DataTemplate>
+                                    </GroupBox.HeaderTemplate>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Border Grid.Row="0"
+                                                BorderBrush="Black"
+                                                Margin=" 0 10" 
+                                                BorderThickness="1">
+                                            <Image Source="{Binding BitmapImage}"/>
+                                        </Border>
+        
+                                        <Grid Grid.Row="1" HorizontalAlignment="Stretch">
+                                            <Button Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                                    HorizontalAlignment="Left"
+                                                    Command="{Binding ElementName=CameraScrollViewer, Path = DataContext.ConnectToCameraCommand}"  
+                                                    CommandParameter="{Binding .}"
+                                                    VerticalAlignment="Bottom"
+                                                    Content="Подключиться"/>
+                                            
+                                            <Button Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                                    HorizontalAlignment="Right"
+                                                    Command="{Binding ElementName=CameraScrollViewer, Path = DataContext.DisconnectToCameraCommand}"  
+                                                    CommandParameter="{Binding .}"
+                                                    VerticalAlignment="Bottom"
+                                                    Content="Отключиться"/>
                                         </Grid>
-                                    </materialDesign:Card>
-                                </Grid>
+                                    </Grid>
+                                </GroupBox>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

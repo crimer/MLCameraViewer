@@ -17,8 +17,6 @@ namespace CameraViewer.Services
         {
             _camera = camera;
             _videoSource = new VideoCaptureDevice(camera.MonikerString);
-            
-            
             _videoSource.NewFrame += VideoServiceOnOnAcceptFrame;
             _videoSource.Start();
         }

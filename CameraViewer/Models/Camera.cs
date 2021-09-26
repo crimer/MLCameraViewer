@@ -16,8 +16,8 @@ namespace CameraViewer.Models
         private string _name;
         public string Name { get => _name; set { Set(ref _name, value); } }
         
-        private IPAddress _ip;
-        public IPAddress Ip { get => _ip; set { Set(ref _ip, value); } }
+        private string _ip;
+        public string Ip { get => _ip; set { Set(ref _ip, value); } }
         
         private int _port;
         public int Port { get => _port; set { Set(ref _port, value); } }
@@ -33,25 +33,19 @@ namespace CameraViewer.Models
         #endregion
 
         /// <summary>
-        /// Создание экземпляра камеры
+        /// Конструктор
         /// </summary>
         /// <param name="name">Название</param>
         /// <param name="ipaddress">Ip адрес</param>
         /// <param name="port">Порт</param>
         /// <returns>Камера</returns>
-        public Camera Create(string name, string ipaddress, string port)
+        public Camera(string name, string ipaddress, string port)
         {
-            if (!IPAddress.TryParse(ipaddress, out var ip))
-                throw new Exception($"Не корректный IP адрес камеры {name}");
-
-            return new Camera()
-            {
-                Name = name,
-                Ip = ip,
-                Id = Guid.NewGuid(),
-                Handler = new CameraHandler(),
-                Port = int.Parse(port),
-            };
+            Id = Guid.NewGuid();
+            Name = name;
+            Ip = ipaddress;
+            Handler = new CameraHandler();
+            Port = int.Parse(port);
         }
     }
 }
