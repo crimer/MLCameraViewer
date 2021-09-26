@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{24DD4EC7-D0FA-4207-87A8-36C80CBD9BF4}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>MLNet</RootNamespace>
+        <AssemblyName>MLNet</AssemblyName>
+        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="Microsoft.ML.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+          <HintPath>..\packages\Microsoft.ML.1.6.0\lib\netstandard2.0\Microsoft.ML.Data.dll</HintPath>
+        </Reference>
+        <Reference Include="System" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Xml" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="DataStructures\ImageNetData.cs" />
+        <Compile Include="DataStructures\ImageNetPrediction.cs" />
+        <Compile Include="OnnxModelScorer.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="YoloParser\DimensionsBase.cs" />
+        <Compile Include="YoloParser\YoloBoundingBox.cs" />
+        <Compile Include="YoloParser\YoloOutputParser.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.ML" Version="1.6.0" />
+        <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="1.6.0" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.9.0" />
+        <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="1.6.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="assets\images" />
+        <Folder Include="assets\Model\" />
+        <Folder Include="assets\Model\" />
+        <Folder Include="DataStructures\" />
+        <Folder Include="YoloParser\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="assets\Model\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="assets\Model\TinyYolo2_model.onnx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+
+</Project>
