@@ -7,7 +7,7 @@
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         mc:Ignorable="d"
-        Title="Камеры" Height="580" Width="1040" MinWidth="490" MinHeight="540" WindowStartupLocation="CenterScreen">
+        Title="Камеры" Height="580" Width="1040" MinWidth="510" MinHeight="540" WindowStartupLocation="CenterScreen">
     <Grid>
         <materialDesign:DialogHost Identifier="RootDialog">
             <Grid>
@@ -31,7 +31,7 @@
                         VerticalAlignment="Bottom" Content="Создать камеру" />
             
                 <!-- Cameras Collection -->
-                <ScrollViewer Grid.Row="2" x:Name="CameraScrollViewer">
+                <ScrollViewer Grid.Row="2" x:Name="CameraScrollViewer" Margin="0,15,0,0">
                     <ItemsControl ItemsSource="{Binding CamerasCollection}">
                         <ItemsControl.ItemContainerStyle>
                             <Style>
@@ -48,7 +48,9 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <GroupBox
-                                    Width="420" Height="300"
+                                    MaxHeight="450"
+                                    MinHeight="200"
+                                    MinWidth="400"
                                     Style="{DynamicResource MaterialDesignCardGroupBox}"
                                     Margin="16">
                                     <GroupBox.HeaderTemplate>
