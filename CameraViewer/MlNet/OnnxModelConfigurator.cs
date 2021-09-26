@@ -7,35 +7,37 @@ namespace CameraViewer.MlNet
 {
     public class OnnxModelConfigurator
     {
-        private readonly MLContext mlContext;
-        private readonly ITransformer mlModel;
+        private readonly MLContext _mlContext;
+        private readonly ITransformer _mlModel;
 
         public OnnxModelConfigurator(IOnnxModel onnxModel)
         {
-            mlContext = new MLContext();
-            // Model creation and pipeline definition for images needs to run just once,
-            // so calling it from the constructor:
-            mlModel = SetupMlNetModel(onnxModel);
+            _mlContext = new MLContext();
+            _mlModel = SetupMlNetModel(onnxModel);
         }
 
         private ITransformer SetupMlNetModel(IOnnxModel onnxModel)
         {
-            var dataView = mlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
-
-            var pipeline = mlContext
-                .Transforms.ResizeImages(
+            var dataView = _mlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
+            
+            var pipeline = _mlContext.Transforms
+                .ResizeImages(
                     resizing: ImageResizingEstimator.ResizingKind.Fill, 
                     outputColumnName: onnxModel.ModelInput, 
                     imageWidth: ImageSettings.ImageWidth, 
                     imageHeight: ImageSettings.ImageHeight, 
-                    inputColumnName: nameof(ImageInputData.Image))
-                .Append(mlContext.Transforms
-                    .ExtractPixels(outputColumnName: onnxModel.ModelInput))
-                .Append(mlContext.Transforms
+                    inputColumnName: nameof(ImageInputData.Image));
+            
+            pipeline
+                .Append(_mlContext.Transforms
+                    .ExtractPixels(onnxModel.ModelInput));
+            
+            pipeline
+                .Append(_mlContext.Transforms
                     .ApplyOnnxModel(
-                        onnxModel.ModelOutput, 
-                        onnxModel.ModelInput, 
-                        onnxModel.ModelPath));
+                        modelFile: onnxModel.ModelPath,
+                        outputColumnName: onnxModel.ModelOutput, 
+                        inputColumnName: onnxModel.ModelInput));
 
             var mlNetModel = pipeline.Fit(dataView);
 
@@ -44,13 +46,13 @@ namespace CameraViewer.MlNet
 
         public PredictionEngine<ImageInputData, T> GetMlNetPredictionEngine<T>() where T : class, IOnnxObjectPrediction, new()
         {
-            return mlContext.Model.CreatePredictionEngine<ImageInputData, T>(mlModel);
+            return _mlContext.Model.CreatePredictionEngine<ImageInputData, T>(_mlModel);
         }
 
         public void SaveMLNetModel(string mlnetModelFilePath)
         {
             // Save/persist the model to a .ZIP file to be loaded by the PredictionEnginePool
-            mlContext.Model.Save(mlModel, null, mlnetModelFilePath);
+            _mlContext.Model.Save(_mlModel, null, mlnetModelFilePath);
         }
     }
 }

@@ -4,8 +4,6 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using AForge.Video;
-using AForge.Video.DirectShow;
 using CameraViewer.Dialogs.AlertDialog;
 using CameraViewer.Dialogs.CreateFrameDialog;
 using CameraViewer.Models;
@@ -20,18 +18,14 @@ namespace CameraViewer.Pages.Home
     /// <summary>
     /// ViewModel главной страницы
     /// </summary>
-    public class HomeVM :  ObservableObject, IDisposable
+    public class HomeVM :  ObservableObject
     {
-        #region Private fields
-        
         private BitmapImage _image;
         private string _ipCameraUrl;
         private bool _isDesktopSource;
         private bool _isIpCameraSource;
         private bool _isWebcamSource;
 
-        #endregion
-        public BitmapImage BitmapImage { get => _image; set { Set(ref _image, value); } }
         public ObservableCollection<Camera> CamerasCollection { get; set; }
         private readonly CreateFrameVM _createFrameVM;
         private readonly AlertDialog _alertDialog;
@@ -68,8 +62,9 @@ namespace CameraViewer.Pages.Home
             {
                 DataContext = _createFrameVM,
             };
+            
         }
-
+        
         private void DisconnectToCamera(object obj)
         {
             var camera = (Camera)obj;
@@ -90,6 +85,9 @@ namespace CameraViewer.Pages.Home
         {
             try
             {
+                if(CamerasCollection.Count == 1)
+                    return;
+                
                 var res = await DialogHost.Show(
                     _createFrameDialog, 
                     "RootDialog", (sender, args) =>
@@ -106,7 +104,6 @@ namespace CameraViewer.Pages.Home
                     return;
 
                 var camera = new Camera(_createFrameVM.Name, _createFrameVM.Ip, _createFrameVM.Port);
-                
                 
                 camera.MonikerString = WebCameraCollections[0].CameraMonikerString;
                 CamerasCollection.Add(camera);
@@ -154,10 +151,6 @@ namespace CameraViewer.Pages.Home
                 _logger.LogError($"Во время валидации произошла ошибка: {ex}");
                 return false;
             }
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

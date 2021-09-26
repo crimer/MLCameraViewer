@@ -49,6 +49,7 @@
                             <DataTemplate>
                                 <GroupBox
                                     MaxHeight="450"
+                                    MaxWidth="600"
                                     MinHeight="200"
                                     MinWidth="400"
                                     Style="{DynamicResource MaterialDesignCardGroupBox}"
@@ -81,7 +82,13 @@
                                                 BorderBrush="Black"
                                                 Margin=" 0 10" 
                                                 BorderThickness="1">
-                                            <Image Source="{Binding BitmapImage}"/>
+                                            <Grid Background="Black">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <Image x:Name="WebCamImage" Grid.Row="0" Source="{Binding BitmapImage}"/>
+                                                <Canvas Grid.Row="0" x:Name="WebCamCanvas"  Width="{Binding Path=ActualWidth, ElementName=WebCamImage}"/>
+                                            </Grid>
                                         </Border>
         
                                         <Grid Grid.Row="1" HorizontalAlignment="Stretch">
