@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,7 +14,12 @@ using CameraViewer.MlNet.YoloParser;
 using CameraViewer.Models;
 using CameraViewer.Utils;
 using Microsoft.ML;
+using Brush = System.Drawing.Brush;
+using Color = System.Drawing.Color;
+using FontStyle = System.Drawing.FontStyle;
 using Path = System.IO.Path;
+using Pen = System.Drawing.Pen;
+using Point = AForge.Point;
 using Rectangle = System.Windows.Shapes.Rectangle;
 
 namespace CameraViewer.Services
@@ -84,8 +90,6 @@ namespace CameraViewer.Services
         
         private void DrawOverlays(List<BoundingBox> filteredBoxes, double originalHeight, double originalWidth)
         {
-            WebCamCanvas.Children.Clear();
-            
             foreach (var box in filteredBoxes)
             {
                 double x = Math.Max(box.Dimensions.X, 0);
@@ -99,39 +103,35 @@ namespace CameraViewer.Services
                 width = originalWidth * width / ImageSettings.ImageWidth;
                 height = originalHeight * height / ImageSettings.ImageHeight;
             
-                var boxColor = box.BoxColor.ToMediaColor();
+                // var boxColor = box.BoxColor.ToMediaColor();
                 
-                var objBox = new Rectangle
+                using (Graphics thumbnailGraphic = Graphics.FromImage(_camera.BitmapImage.ToBitmap()))
                 {
-                    Width = width,
-                    Height = height,
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(boxColor),
-                    StrokeThickness = 2.0,
-                    Margin = new Thickness(x, y, 0, 0)
-                };
+                    thumbnailGraphic.CompositingQuality = CompositingQuality.HighQuality;
+                    thumbnailGraphic.SmoothingMode = SmoothingMode.HighQuality;
+                    thumbnailGraphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                var objDescription = new TextBlock
-                {
-                    Margin = new Thickness(x + 4, y + 4, 0, 0),
-                    Text = box.Description,
-                    FontWeight = FontWeights.Bold,
-                    Width = 126,
-                    Height = 21,
-                    TextAlignment = TextAlignment.Center
-                };
+                    // Define Text Options
+                    Font drawFont = new Font("Arial", 12, FontStyle.Bold);
+                    SizeF size = thumbnailGraphic.MeasureString(box.Description, drawFont);
+                    Brush fontBrush = new SolidBrush(Color.Black);
+                    System.Drawing.Point atPoint = new System.Drawing.Point((int)x, (int)y - (int)size.Height - 1);
+                    
+                    // Define BoundingBox options
+                    Pen pen = new Pen(box.BoxColor, 3.2f);
 
-                var objDescriptionBackground = new Rectangle
-                {
-                    Width = 134,
-                    Height = 29,
-                    Fill = new SolidColorBrush(boxColor),
-                    Margin = new Thickness(x, y, 0, 0)
-                };
+                    // Draw text on image 
+                    thumbnailGraphic.FillRectangle(
+                        new SolidBrush(box.BoxColor), 
+                        (int)x, 
+                        (int)(y - size.Height - 1),
+                        (int)size.Width, (int)size.Height);
+                    
+                    thumbnailGraphic.DrawString(box.Description, drawFont, fontBrush, atPoint);
 
-                WebCamCanvas.Children.Add(objDescriptionBackground);
-                WebCamCanvas.Children.Add(objDescription);
-                WebCamCanvas.Children.Add(objBox);
+                    // Draw bounding box on image
+                    thumbnailGraphic.DrawRectangle(pen, (float)x, (float)y, (float)width, (float)height);
+                }
             }
         }
         
