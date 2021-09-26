@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.Data;
 
-namespace MlHumanDetection.ML.DataModels
+namespace CameraViewer.MlNet.DataModels
 {
     public class TinyYoloPrediction : IOnnxObjectPrediction
     {

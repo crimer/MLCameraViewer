@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using CameraViewer.MlNet.DataModels;
 using Microsoft.ML;
 using Microsoft.ML.Transforms.Image;
-using MlHumanDetection.ML.DataModels;
 
-namespace MlHumanDetection
+namespace CameraViewer.MlNet
 {
     public class OnnxModelConfigurator
     {

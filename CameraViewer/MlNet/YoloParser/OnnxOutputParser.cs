@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using MlHumanDetection.ML.DataModels;
+using CameraViewer.MlNet.DataModels;
 
-namespace MlHumanDetection.YoloParser
+namespace CameraViewer.MlNet.YoloParser
 {
     public class OnnxOutputParser
     {

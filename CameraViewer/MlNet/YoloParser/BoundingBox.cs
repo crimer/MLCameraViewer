@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace MlHumanDetection.YoloParser
+namespace CameraViewer.MlNet.YoloParser
 {
     public class BoundingBoxDimensions
     {
@@ -29,12 +29,12 @@ namespace MlHumanDetection.YoloParser
 
         private static readonly Color[] classColors = new Color[]
         {
-            Color.Khaki, Color.Fuchsia, Color.Silver, Color.RoyalBlue,
-            Color.Green, Color.DarkOrange, Color.Purple, Color.Gold,
-            Color.Red, Color.Aquamarine, Color.Lime, Color.AliceBlue,
-            Color.Sienna, Color.Orchid, Color.Tan, Color.LightPink,
-            Color.Yellow, Color.HotPink, Color.OliveDrab, Color.SandyBrown,
-            Color.DarkTurquoise
+            Color.Red, Color.Red, Color.Red, Color.Red,
+            Color.Red, Color.Red, Color.Red, Color.Red,
+            Color.Red, Color.Red, Color.Red, Color.Red,
+            Color.Red, Color.Red, Color.Red, Color.Red,
+            Color.Red, Color.Red, Color.Red, Color.Red,
+            Color.Red
         };
 
         public static Color GetColor(int index) => index < classColors.Length ? classColors[index] : classColors[index % classColors.Length];

@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using Microsoft.ML.Transforms.Image;
 
-namespace MlHumanDetection.ML.DataModels
+namespace CameraViewer.MlNet.DataModels
 {
     public struct ImageSettings
     {

@@ -1,4 +1,4 @@
-﻿namespace MlHumanDetection.ML.DataModels
+﻿namespace CameraViewer.MlNet.DataModels
 {
     public class TinyYoloModel : IOnnxModel
     {

@@ -15,6 +15,10 @@
       <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+      <PackageReference Include="Microsoft.ML" Version="1.6.0" />
+      <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="1.6.0" />
+      <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.9.0" />
+      <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="1.6.0" />
       <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
     </ItemGroup>
 
@@ -26,9 +30,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="OzekiSDK, Version=10.3.123.0, Culture=neutral, PublicKeyToken=4812fb35129b8487">
-        <HintPath>..\..\..\..\..\Program Files\Ozeki\Ozeki SDK\SDK\NET4\OzekiSDK.dll</HintPath>
-      </Reference>
+      <None Remove="MlNet\OnnxModels\TinyYolo2_model.onnx" />
+      <Content Include="MlNet\OnnxModels\TinyYolo2_model.onnx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
