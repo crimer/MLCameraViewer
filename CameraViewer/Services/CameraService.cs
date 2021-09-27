@@ -1,19 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AForge.Video.DirectShow;
 using CameraViewer.Models;
 
 namespace CameraViewer.Services
 {
-    public class VideoService
+    /// <summary>
+    /// Сервис по работе с камерами
+    /// </summary>
+    public class CameraService
     {
+        /// <summary>
+        /// Коллекция устройств
+        /// </summary>
         private FilterInfoCollection _videoDevicesList;
         
-        public VideoService()
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        public CameraService()
         {
             _videoDevicesList = new FilterInfoCollection(FilterCategory.VideoInputDevice);
         }
-
+        
+        /// <summary>
+        /// Получение всех камер
+        /// </summary>
+        /// <returns>Коллекция камер</returns>
         public List<WebCameraInfo> GetCameras()
         { 
             var webCameraInfos = new List<WebCameraInfo>();

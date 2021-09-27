@@ -36,33 +36,32 @@ namespace CameraViewer.Pages.Home
         public ICommand ConnectToCameraCommand { get; private set; }
         public ICommand DisconnectToCameraCommand { get; private set; }
    
-        private readonly VideoService _videoService;
+        private readonly CameraService _cameraService;
         private readonly ILogger<HomeVM> _logger;
 
         /// <summary>
         /// Конструктор
         /// </summary>
-        /// <param name="videoService">Сервис видео</param>
+        /// <param name="cameraService">Сервис видео</param>
         /// <param name="logger">Логгер</param>
-        public HomeVM(VideoService videoService, ILogger<HomeVM> logger)
+        public HomeVM(CameraService cameraService, ILogger<HomeVM> logger)
         {
             _logger = logger;
-            _videoService = videoService;
+            _cameraService = cameraService;
 
             CamerasCollection = new ObservableCollection<Camera>();
-            WebCameraCollections = new ObservableCollection<WebCameraInfo>(_videoService.GetCameras());
+            WebCameraCollections = new ObservableCollection<WebCameraInfo>(_cameraService.GetCameras());
             
             OpenCreateFrameDialogCommand = new RelayCommand(OpenCreateFrameDialog);
             ConnectToCameraCommand = new RelayCommand<object>(ConnectToCamera);
             DisconnectToCameraCommand = new RelayCommand<object>(DisconnectToCamera);
 
             _alertDialog = new AlertDialog();
-            _createFrameVM = new CreateFrameVM();
+            _createFrameVM = new CreateFrameVM(WebCameraCollections);
             _createFrameDialog = new CreateFrameDialog
             {
                 DataContext = _createFrameVM,
             };
-            
         }
         
         private void DisconnectToCamera(object obj)
@@ -96,57 +95,11 @@ namespace CameraViewer.Pages.Home
                 if(!_frameCreationParameterResult)
                     return;
                 
-                var isValid = await Validate(_createFrameVM.Name, _createFrameVM.Ip, _createFrameVM.Port);
-                if(!isValid)
-                    return;
-
-                var camera = new Camera(_createFrameVM.Name, _createFrameVM.Ip, _createFrameVM.Port);
-                
-                camera.MonikerString = WebCameraCollections[0].CameraMonikerString;
-                CamerasCollection.Add(camera);
+                CamerasCollection.Add(new Camera(_createFrameVM.SelectedCamera));
             }
             catch (Exception ex)
             {
                 _logger.LogError($"При создании камеры произошла ошибка: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// Валидация данных с модального окна
-        /// </summary>
-        /// <param name="name">Имя фрейма</param>
-        /// <param name="ipaddress">IP адрес камеры</param>
-        /// <param name="port">Порт камеры</param>
-        /// <returns>Результат валидации</returns>
-        private async Task<bool> Validate(string name, string ipaddress, string port)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    _alertDialog.ModalText.Text = "Некорректное имя";
-                    await DialogHost.Show(_alertDialog, "RootDialog");
-                    return false;
-                }
-                if (!IPAddress.TryParse(ipaddress, out var ip))
-                {
-                    _alertDialog.ModalText.Text = "Некорректное IP адрес";
-                    await DialogHost.Show(_alertDialog, "RootDialog");
-                    return false;
-                }
-                if (!int.TryParse(port, out var parsedPort) || parsedPort <= 0 || parsedPort > 65000)
-                {
-                    _alertDialog.ModalText.Text = "Некорректное порт";
-                    await DialogHost.Show(_alertDialog, "RootDialog");
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Во время валидации произошла ошибка: {ex}");
-                return false;
             }
         }
     }

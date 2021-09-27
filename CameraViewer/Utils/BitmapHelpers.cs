@@ -5,8 +5,16 @@ using System.Windows.Media.Imaging;
 
 namespace CameraViewer.Utils
 {
+    /// <summary>
+    /// Класс помошник для конвертаций Bitmap
+    /// </summary>
     public static class BitmapHelpers
     {
+        /// <summary>
+        /// Из Bitmap в BitmapImage
+        /// </summary>
+        /// <param name="bitmap">Bitmap</param>
+        /// <returns>BitmapImage</returns>
         public static BitmapImage ToBitmapImage(this Bitmap bitmap)
         {
             BitmapImage bi = new BitmapImage();
@@ -19,6 +27,11 @@ namespace CameraViewer.Utils
             return bi;
         }
         
+        /// <summary>
+        /// Из BitmapImage в Bitmap
+        /// </summary>
+        /// <param name="bitmapImage">BitmapImage</param>
+        /// <returns>Bitmap</returns>
         public static Bitmap ToBitmap(this BitmapImage bitmapImage)
         {
             using(MemoryStream outStream = new MemoryStream())
@@ -26,7 +39,7 @@ namespace CameraViewer.Utils
                 BitmapEncoder enc = new BmpBitmapEncoder();
                 enc.Frames.Add(BitmapFrame.Create(bitmapImage));
                 enc.Save(outStream);
-                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
+                Bitmap bitmap = new Bitmap(outStream);
 
                 return new Bitmap(bitmap);
             }
