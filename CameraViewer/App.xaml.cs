@@ -2,7 +2,10 @@
 using System.IO;
 using System.Windows;
 using CameraViewer.Configuration;
+using CameraViewer.Database;
 using CameraViewer.Pages.Home;
+using CameraViewer.Repositories.ClickHouse;
+using CameraViewer.Repositories.Redis;
 using CameraViewer.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +65,13 @@ namespace CameraViewer
             
             services.AddSingleton<HomeVM>();
             services.AddSingleton<CameraService>();
+            
+            services.AddSingleton<RedisDbProvider>();
+            services.AddSingleton<ClickHouseDbProvider>();
+            
+            services.AddSingleton<RedisRepository>();
+            services.AddSingleton<ClickHouseMetricRepository>();
+            services.AddSingleton<ScriptsProvider>();
         }
     }
 }

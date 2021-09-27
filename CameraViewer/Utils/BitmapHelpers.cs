@@ -26,7 +26,7 @@ namespace CameraViewer.Utils
             bi.EndInit();
             return bi;
         }
-        
+
         /// <summary>
         /// Из BitmapImage в Bitmap
         /// </summary>
@@ -34,7 +34,7 @@ namespace CameraViewer.Utils
         /// <returns>Bitmap</returns>
         public static Bitmap ToBitmap(this BitmapImage bitmapImage)
         {
-            using(MemoryStream outStream = new MemoryStream())
+            using (MemoryStream outStream = new MemoryStream())
             {
                 BitmapEncoder enc = new BmpBitmapEncoder();
                 enc.Frames.Add(BitmapFrame.Create(bitmapImage));
