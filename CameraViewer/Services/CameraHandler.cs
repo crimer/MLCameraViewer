@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -19,8 +21,6 @@ using Color = System.Drawing.Color;
 using FontStyle = System.Drawing.FontStyle;
 using Path = System.IO.Path;
 using Pen = System.Drawing.Pen;
-using Point = AForge.Point;
-using Rectangle = System.Windows.Shapes.Rectangle;
 
 namespace CameraViewer.Services
 {
@@ -32,25 +32,34 @@ namespace CameraViewer.Services
         private PredictionEngine<ImageInputData, TinyYoloPrediction> tinyYoloPredictionEngine;
         private static readonly string modelsDirectory = Path.Combine(Environment.CurrentDirectory, @"MlNet\OnnxModels");
 
+        public CameraHandler()
+        {
+            LoadModel();
+        }
+        
         private void LoadModel()
         {
             var tinyYoloModel = new TinyYoloModel(Path.Combine(modelsDirectory, "TinyYolo2_model.onnx"));
             var modelConfigurator = new OnnxModelConfigurator(tinyYoloModel);
 
             outputParser = new OnnxOutputParser(tinyYoloModel);
+            // var transformer = modelConfigurator.MlContext.Model.Load(Path.Combine(modelsDirectory, "model2.zip"), out var scheeme);
             tinyYoloPredictionEngine = modelConfigurator.GetMlNetPredictionEngine<TinyYoloPrediction>();
+            // tinyYoloPredictionEngine = modelConfigurator.MlContext.Model.CreatePredictionEngine<ImageInputData, TinyYoloPrediction>(transformer, scheeme);
         }
         
-        public void Connect(Camera camera)
+        public async Task Connect(Camera camera)
         {
-            LoadModel();
-            _camera = camera;
-            _videoSource = new VideoCaptureDevice(camera.MonikerString);
-            _videoSource.NewFrame += VideoServiceOnOnAcceptFrame;
-            _videoSource.Start();
+            await Task.Run(() =>
+            {
+                _camera = camera;
+                _videoSource = new VideoCaptureDevice(camera.MonikerString);
+                _videoSource.NewFrame += VideoSourceOnNewFrame;
+                _videoSource.Start();
+            });
         }
-        
-        private void VideoServiceOnOnAcceptFrame(object sender, NewFrameEventArgs eventArgs)
+
+        private void VideoSourceOnNewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             try
             {
@@ -58,9 +67,13 @@ namespace CameraViewer.Services
                 {
                     var bi = bitmap.ToBitmapImage();
                     bi.Freeze();
-                    Dispatcher.CurrentDispatcher.Invoke(() => _camera.BitmapImage = bi);
-                    
-                    ParseWebCamFrame(bitmap);
+                        
+                    Dispatcher.CurrentDispatcher.Invoke(() =>
+                    {
+                        _camera.BitmapImage = bi;
+                        ParseWebCamFrame(bitmap);
+                    });
+                
                 }
             }
             catch (Exception ex)
@@ -68,21 +81,28 @@ namespace CameraViewer.Services
                 Console.WriteLine($"При создании камеры произошла ошибка: {ex}");
             }
         }
-        
+
+
         private void ParseWebCamFrame(Bitmap bitmap)
         {
             var frame = new ImageInputData { Image = bitmap };
             var filteredBoxes = DetectObjectsUsingModel(frame);
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
+            if(filteredBoxes == null || filteredBoxes.Count == 0)
+                filteredBoxes = new List<BoundingBox>();
+                
+            // Application.Current.Dispatcher.Invoke(() =>
+            // {
                 DrawOverlays(filteredBoxes, _camera.BitmapImage.Height, _camera.BitmapImage.Width);
-            });
+            // });
         }
 
         public List<BoundingBox> DetectObjectsUsingModel(ImageInputData imageInputData)
         {
-            var labels = tinyYoloPredictionEngine?.Predict(imageInputData).PredictedLabels;
+            var label = tinyYoloPredictionEngine.Predict(imageInputData);
+            var labels = label?.PredictedLabels;
+            if (labels == null || labels.Length == 0)
+                return new List<BoundingBox>();
+            
             var boundingBoxes = outputParser.ParseOutputs(labels);
             var filteredBoxes = outputParser.FilterBoundingBoxes(boundingBoxes, 5, 0.5f);
             return filteredBoxes;
@@ -141,6 +161,7 @@ namespace CameraViewer.Services
                 return;
             
             _videoSource.SignalToStop();
+            _videoSource.NewFrame -= VideoSourceOnNewFrame;
         }
     }
 }

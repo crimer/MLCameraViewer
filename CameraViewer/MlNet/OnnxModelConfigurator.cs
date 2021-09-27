@@ -7,20 +7,21 @@ namespace CameraViewer.MlNet
 {
     public class OnnxModelConfigurator
     {
-        private readonly MLContext _mlContext;
+        public MLContext MlContext;
         private readonly ITransformer _mlModel;
 
         public OnnxModelConfigurator(IOnnxModel onnxModel)
         {
-            _mlContext = new MLContext();
+            MlContext = new MLContext();
+            // _mlModel = _mlContext.Model.Load(@"C:\Users\shevn\Desktop\CameraViewer\CameraViewer\bin\Debug\net472\MlNet\OnnxModels\model.zip", out var modelSchema);
             _mlModel = SetupMlNetModel(onnxModel);
         }
 
         private ITransformer SetupMlNetModel(IOnnxModel onnxModel)
         {
-            var dataView = _mlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
+            var dataView = MlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
             
-            var pipeline = _mlContext.Transforms
+            var pipeline = MlContext.Transforms
                 .ResizeImages(
                     resizing: ImageResizingEstimator.ResizingKind.Fill, 
                     outputColumnName: onnxModel.ModelInput, 
@@ -29,30 +30,30 @@ namespace CameraViewer.MlNet
                     inputColumnName: nameof(ImageInputData.Image));
             
             pipeline
-                .Append(_mlContext.Transforms
+                .Append(MlContext.Transforms
                     .ExtractPixels(onnxModel.ModelInput));
             
             pipeline
-                .Append(_mlContext.Transforms
+                .Append(MlContext.Transforms
                     .ApplyOnnxModel(
                         modelFile: onnxModel.ModelPath,
                         outputColumnName: onnxModel.ModelOutput, 
                         inputColumnName: onnxModel.ModelInput));
 
             var mlNetModel = pipeline.Fit(dataView);
-
+            // MlContext.Model.Save(_mlModel, dataView.Schema, "model2.zip");
             return mlNetModel;
         }
 
         public PredictionEngine<ImageInputData, T> GetMlNetPredictionEngine<T>() where T : class, IOnnxObjectPrediction, new()
         {
-            return _mlContext.Model.CreatePredictionEngine<ImageInputData, T>(_mlModel);
+            return MlContext.Model.CreatePredictionEngine<ImageInputData, T>(_mlModel);
         }
 
         public void SaveMLNetModel(string mlnetModelFilePath)
         {
             // Save/persist the model to a .ZIP file to be loaded by the PredictionEnginePool
-            _mlContext.Model.Save(_mlModel, null, mlnetModelFilePath);
+            MlContext.Model.Save(_mlModel, null, mlnetModelFilePath);
         }
     }
 }

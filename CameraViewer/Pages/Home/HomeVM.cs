@@ -85,9 +85,6 @@ namespace CameraViewer.Pages.Home
         {
             try
             {
-                if(CamerasCollection.Count == 1)
-                    return;
-                
                 var res = await DialogHost.Show(
                     _createFrameDialog, 
                     "RootDialog", (sender, args) =>
