@@ -87,7 +87,7 @@ namespace CameraViewer.Services
         {
             var frame = new ImageInputData { Image = bitmap };
             var filteredBoxes = DetectObjectsUsingModel(frame);
-            if(filteredBoxes == null || filteredBoxes.Count == 0)
+            if(filteredBoxes.IsNullOrEmpty())
                 filteredBoxes = new List<BoundingBox>();
                 
             // Application.Current.Dispatcher.Invoke(() =>
@@ -100,7 +100,7 @@ namespace CameraViewer.Services
         {
             var label = tinyYoloPredictionEngine.Predict(imageInputData);
             var labels = label?.PredictedLabels;
-            if (labels == null || labels.Length == 0)
+            if (labels.IsNullOrEmpty())
                 return new List<BoundingBox>();
             
             var boundingBoxes = outputParser.ParseOutputs(labels);
