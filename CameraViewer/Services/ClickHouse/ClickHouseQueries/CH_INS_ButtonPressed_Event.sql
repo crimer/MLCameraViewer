@@ -1,0 +1,2 @@
+INSERT INTO ButtonTest(SysRowDate, SessionGuid, EventDateUTC, UserTimeZone, ButtonGuid, ButtonName, EventTitle, EventDescription, DivisionGuid, DivisionName, RDCGuid, RDCName, BranchGuid, BranchName) 
+VALUES (@SysRowDate, @SessionGuid, @EventDateUTC, @UserTimeZone, @ButtonGuid, @ButtonName, @EventTitle, @EventDescription, @DivisionGuid, @DivisionName, @RDCGuid, @RDCName, @BranchGuid, @BranchName);

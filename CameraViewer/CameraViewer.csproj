@@ -17,6 +17,7 @@
     <ItemGroup>
       <PackageReference Include="AForge.Video" Version="2.2.5" />
       <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
+      <PackageReference Include="ClickHouse.Ado" Version="1.4.0" />
       <PackageReference Include="MaterialDesignThemes" Version="4.2.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
@@ -47,6 +48,10 @@
       <Content Include="MlNet\OnnxModels\model.zip">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\Interfaces" />
     </ItemGroup>
 
 </Project>
