@@ -45,13 +45,15 @@
                         </ItemsControl.ItemsPanel>
                         
                         <!-- Camera Items -->
+                                    <!-- MaxHeight="450" -->
+                                    <!-- MaxWidth="600" -->
+                                    <!-- MinHeight="200" -->
+                                    <!-- MinWidth="400" -->
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <GroupBox
-                                    MaxHeight="450"
-                                    MaxWidth="600"
-                                    MinHeight="200"
-                                    MinWidth="400"
+                                    Width="416"
+                                    Height="416"
                                     Style="{DynamicResource MaterialDesignCardGroupBox}"
                                     Margin="16">
                                     <GroupBox.HeaderTemplate>

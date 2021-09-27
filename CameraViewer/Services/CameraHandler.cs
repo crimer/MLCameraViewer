@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,8 +16,11 @@ using CameraViewer.MlNet.YoloParser;
 using CameraViewer.Models;
 using CameraViewer.Utils;
 using Microsoft.ML;
+using Brush = System.Drawing.Brush;
+using Color = System.Drawing.Color;
+using FontStyle = System.Drawing.FontStyle;
 using Path = System.IO.Path;
-using Rectangle = System.Windows.Shapes.Rectangle;
+using Pen = System.Drawing.Pen;
 
 namespace CameraViewer.Services
 {
@@ -26,25 +32,34 @@ namespace CameraViewer.Services
         private PredictionEngine<ImageInputData, TinyYoloPrediction> tinyYoloPredictionEngine;
         private static readonly string modelsDirectory = Path.Combine(Environment.CurrentDirectory, @"MlNet\OnnxModels");
 
+        public CameraHandler()
+        {
+            LoadModel();
+        }
+        
         private void LoadModel()
         {
             var tinyYoloModel = new TinyYoloModel(Path.Combine(modelsDirectory, "TinyYolo2_model.onnx"));
             var modelConfigurator = new OnnxModelConfigurator(tinyYoloModel);
 
             outputParser = new OnnxOutputParser(tinyYoloModel);
+            // var transformer = modelConfigurator.MlContext.Model.Load(Path.Combine(modelsDirectory, "model2.zip"), out var scheeme);
             tinyYoloPredictionEngine = modelConfigurator.GetMlNetPredictionEngine<TinyYoloPrediction>();
+            // tinyYoloPredictionEngine = modelConfigurator.MlContext.Model.CreatePredictionEngine<ImageInputData, TinyYoloPrediction>(transformer, scheeme);
         }
         
-        public void Connect(Camera camera)
+        public async Task Connect(Camera camera)
         {
-            LoadModel();
-            _camera = camera;
-            _videoSource = new VideoCaptureDevice(camera.MonikerString);
-            _videoSource.NewFrame += VideoServiceOnOnAcceptFrame;
-            _videoSource.Start();
+            await Task.Run(() =>
+            {
+                _camera = camera;
+                _videoSource = new VideoCaptureDevice(camera.MonikerString);
+                _videoSource.NewFrame += VideoSourceOnNewFrame;
+                _videoSource.Start();
+            });
         }
-        
-        private void VideoServiceOnOnAcceptFrame(object sender, NewFrameEventArgs eventArgs)
+
+        private void VideoSourceOnNewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             try
             {
@@ -52,9 +67,13 @@ namespace CameraViewer.Services
                 {
                     var bi = bitmap.ToBitmapImage();
                     bi.Freeze();
-                    Dispatcher.CurrentDispatcher.Invoke(() => _camera.BitmapImage = bi);
-                    
-                    ParseWebCamFrame(bitmap);
+                        
+                    Dispatcher.CurrentDispatcher.Invoke(() =>
+                    {
+                        _camera.BitmapImage = bi;
+                        ParseWebCamFrame(bitmap);
+                    });
+                
                 }
             }
             catch (Exception ex)
@@ -62,21 +81,28 @@ namespace CameraViewer.Services
                 Console.WriteLine($"При создании камеры произошла ошибка: {ex}");
             }
         }
-        
+
+
         private void ParseWebCamFrame(Bitmap bitmap)
         {
             var frame = new ImageInputData { Image = bitmap };
             var filteredBoxes = DetectObjectsUsingModel(frame);
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
+            if(filteredBoxes == null || filteredBoxes.Count == 0)
+                filteredBoxes = new List<BoundingBox>();
+                
+            // Application.Current.Dispatcher.Invoke(() =>
+            // {
                 DrawOverlays(filteredBoxes, _camera.BitmapImage.Height, _camera.BitmapImage.Width);
-            });
+            // });
         }
 
         public List<BoundingBox> DetectObjectsUsingModel(ImageInputData imageInputData)
         {
-            var labels = tinyYoloPredictionEngine?.Predict(imageInputData).PredictedLabels;
+            var label = tinyYoloPredictionEngine.Predict(imageInputData);
+            var labels = label?.PredictedLabels;
+            if (labels == null || labels.Length == 0)
+                return new List<BoundingBox>();
+            
             var boundingBoxes = outputParser.ParseOutputs(labels);
             var filteredBoxes = outputParser.FilterBoundingBoxes(boundingBoxes, 5, 0.5f);
             return filteredBoxes;
@@ -84,8 +110,6 @@ namespace CameraViewer.Services
         
         private void DrawOverlays(List<BoundingBox> filteredBoxes, double originalHeight, double originalWidth)
         {
-            WebCamCanvas.Children.Clear();
-            
             foreach (var box in filteredBoxes)
             {
                 double x = Math.Max(box.Dimensions.X, 0);
@@ -99,39 +123,35 @@ namespace CameraViewer.Services
                 width = originalWidth * width / ImageSettings.ImageWidth;
                 height = originalHeight * height / ImageSettings.ImageHeight;
             
-                var boxColor = box.BoxColor.ToMediaColor();
+                // var boxColor = box.BoxColor.ToMediaColor();
                 
-                var objBox = new Rectangle
+                using (Graphics thumbnailGraphic = Graphics.FromImage(_camera.BitmapImage.ToBitmap()))
                 {
-                    Width = width,
-                    Height = height,
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(boxColor),
-                    StrokeThickness = 2.0,
-                    Margin = new Thickness(x, y, 0, 0)
-                };
+                    thumbnailGraphic.CompositingQuality = CompositingQuality.HighQuality;
+                    thumbnailGraphic.SmoothingMode = SmoothingMode.HighQuality;
+                    thumbnailGraphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                var objDescription = new TextBlock
-                {
-                    Margin = new Thickness(x + 4, y + 4, 0, 0),
-                    Text = box.Description,
-                    FontWeight = FontWeights.Bold,
-                    Width = 126,
-                    Height = 21,
-                    TextAlignment = TextAlignment.Center
-                };
+                    // Define Text Options
+                    Font drawFont = new Font("Arial", 12, FontStyle.Bold);
+                    SizeF size = thumbnailGraphic.MeasureString(box.Description, drawFont);
+                    Brush fontBrush = new SolidBrush(Color.Black);
+                    System.Drawing.Point atPoint = new System.Drawing.Point((int)x, (int)y - (int)size.Height - 1);
+                    
+                    // Define BoundingBox options
+                    Pen pen = new Pen(box.BoxColor, 3.2f);
 
-                var objDescriptionBackground = new Rectangle
-                {
-                    Width = 134,
-                    Height = 29,
-                    Fill = new SolidColorBrush(boxColor),
-                    Margin = new Thickness(x, y, 0, 0)
-                };
+                    // Draw text on image 
+                    thumbnailGraphic.FillRectangle(
+                        new SolidBrush(box.BoxColor), 
+                        (int)x, 
+                        (int)(y - size.Height - 1),
+                        (int)size.Width, (int)size.Height);
+                    
+                    thumbnailGraphic.DrawString(box.Description, drawFont, fontBrush, atPoint);
 
-                WebCamCanvas.Children.Add(objDescriptionBackground);
-                WebCamCanvas.Children.Add(objDescription);
-                WebCamCanvas.Children.Add(objBox);
+                    // Draw bounding box on image
+                    thumbnailGraphic.DrawRectangle(pen, (float)x, (float)y, (float)width, (float)height);
+                }
             }
         }
         
@@ -141,6 +161,7 @@ namespace CameraViewer.Services
                 return;
             
             _videoSource.SignalToStop();
+            _videoSource.NewFrame -= VideoSourceOnNewFrame;
         }
     }
 }

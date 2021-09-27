@@ -3,6 +3,9 @@ using Microsoft.ML.Transforms.Image;
 
 namespace CameraViewer.MlNet.DataModels
 {
+    /// <summary>
+    /// Размеры фрейма
+    /// </summary>
     public struct ImageSettings
     {
         public const int ImageHeight = 416;

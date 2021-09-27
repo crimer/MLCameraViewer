@@ -10,19 +10,30 @@ using Microsoft.Extensions.Logging;
 
 namespace CameraViewer
 {
-    
+    /// <summary>
+    /// Точка входа приложения
+    /// </summary>
     public partial class App : Application
     {
+        /// <summary>
+        /// Провайдер сервисов
+        /// </summary>
         public static IServiceProvider ServiceProvider { get; private set; }
  
+        /// <summary>
+        /// Конфигурация приложения
+        /// </summary>
         public IConfiguration Configuration { get; private set; }
  
+        /// <summary>
+        /// Запуск
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
- 
             
             Configuration = builder.Build();
             
@@ -37,6 +48,10 @@ namespace CameraViewer
             mainWindow.Show();
         }
  
+        /// <summary>
+        /// Конфигурация сервисов
+        /// </summary>
+        /// <param name="services">Коллекция сервисов</param>
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(configure =>
@@ -46,7 +61,7 @@ namespace CameraViewer
             });
             
             services.AddSingleton<HomeVM>();
-            services.AddSingleton<VideoService>();
+            services.AddSingleton<CameraService>();
         }
     }
 }

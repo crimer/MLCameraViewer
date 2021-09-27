@@ -12,38 +12,22 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" 
                    Text="Создать камеру"
                    HorizontalAlignment="Center"
                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
-        <TextBox wpf:HintAssist.Hint="Название" 
-                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"                 
-                 Margin="0 6 0 0"
-                 FontSize="18"
-                 Grid.Row="1"
-                 Text="{Binding Name, Mode=TwoWay}">
-        </TextBox>
-        <TextBox wpf:HintAssist.Hint="Ip адрес" 
-                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                 Margin="0 8 0 0"
-                 FontSize="16" 
-                 Grid.Row="2"
-                 Text="{Binding Ip, Mode=TwoWay}">
-        </TextBox>
-        <TextBox wpf:HintAssist.Hint="Порт" 
-                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                 Margin="0 8 0 0"
-                 FontSize="16" 
-                 PreviewTextInput="NumberValidationTextBox"
-                 x:Name="Port"
-                 Grid.Row="3"
-                 Text="{Binding Port, Mode=TwoWay}">
-        </TextBox>
+        
+        <ComboBox Grid.Row="1" 
+                  wpf:HintAssist.Hint="Камеры"
+                  ItemsSource="{Binding CamerasCollection}"
+                  DisplayMemberPath="CameraName"
+                  SelectedItem="{Binding SelectedCamera}"
+                  SelectedValuePath="CameraName"
+                  IsSynchronizedWithCurrentItem="True"/>
+
         <StackPanel Orientation="Horizontal" 
-                    Grid.Row="4" 
+                    Grid.Row="2" 
                     HorizontalAlignment="Center"
                     Margin="0 16 0 0">
             
