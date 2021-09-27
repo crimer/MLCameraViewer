@@ -2,6 +2,6 @@
 {
     public class AppConfig
     {
-        
+        public string ClickHouseConnection { get; set; }
     }
 }
