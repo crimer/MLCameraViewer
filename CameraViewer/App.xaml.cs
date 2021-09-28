@@ -4,6 +4,7 @@ using System.Windows;
 using CameraViewer.Configuration;
 using CameraViewer.Database;
 using CameraViewer.MlNet;
+using CameraViewer.MlNet.DataModels.TinyYolo;
 using CameraViewer.Pages.Home;
 using CameraViewer.Repositories.ClickHouse;
 using CameraViewer.Repositories.Redis;
@@ -48,15 +49,9 @@ namespace CameraViewer
  
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
-#if DEBUG
             ServiceProvider
                 .GetRequiredService<Trainer>()
-                .SetupModel();
-#elif
-            ServiceProvider
-                .GetRequiredService<Trainer>()
-                .SetupModel();
-#endif
+                .SetupModel(new TinyYoloModel("TinyYolo2_model.onnx"));
             
             var mainWindow = new HomeWindow();
             mainWindow.Show();

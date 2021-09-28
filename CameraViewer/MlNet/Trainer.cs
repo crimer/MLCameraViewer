@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using CameraViewer.MlNet.DataModels;
 using Microsoft.ML;
 using Microsoft.ML.Transforms.Image;
@@ -7,21 +9,25 @@ namespace CameraViewer.MlNet
 {
     public class Trainer
     {
-        public MLContext MlContext;
-        private readonly ITransformer _mlModel;
+        private readonly string _modelsDirectory = Path.Combine(Environment.CurrentDirectory, @"MlNet\OnnxModels");
+        private MLContext _mlContext;
+        private ITransformer _mlModel;
 
-        public Trainer(IOnnxModel onnxModel)
+        public MLContext MlContext => _mlContext;
+        public ITransformer MlModel => _mlModel;
+        
+        public Trainer()
         {
-            MlContext = new MLContext();
-            // _mlModel = _mlContext.Model.Load(@"C:\Users\shevn\Desktop\CameraViewer\CameraViewer\bin\Debug\net472\MlNet\OnnxModels\model.zip", out var modelSchema);
-            // _mlModel = SetupMlNetModel(onnxModel);
+            _mlContext = new MLContext();
         }
 
         public ITransformer SetupModel(IOnnxModel onnxModel)
         {
-            var dataView = MlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
+            var onnxModelPath = Path.Combine(_modelsDirectory, "TinyYolo2_model.onnx");
             
-            var pipeline = MlContext.Transforms
+            var dataView = _mlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
+            
+            var pipeline = _mlContext.Transforms
                 .ResizeImages(
                     resizing: ImageResizingEstimator.ResizingKind.Fill, 
                     outputColumnName: onnxModel.ModelInput, 
@@ -30,31 +36,46 @@ namespace CameraViewer.MlNet
                     inputColumnName: nameof(ImageInputData.Image));
             
             pipeline
-                .Append(MlContext.Transforms
+                .Append(_mlContext.Transforms
                     .ExtractPixels(onnxModel.ModelInput));
             
             pipeline
-                .Append(MlContext.Transforms
+                .Append(_mlContext.Transforms
                     .ApplyOnnxModel(
-                        modelFile: onnxModel.ModelPath,
+                        modelFile: onnxModelPath,
                         outputColumnName: onnxModel.ModelOutput, 
                         inputColumnName: onnxModel.ModelInput));
-
-            var mlNetModel = pipeline.Fit(dataView);
-            // MlContext.Model.Save(_mlModel, dataView.Schema, "model2.zip");
-            return mlNetModel;
+            
+            _mlModel = pipeline.Fit(dataView);
+            return _mlModel;
         }
 
-        public void SaveModel(string mlnetModelFilePath)
+        /// <summary>
+        /// Сохренение модели
+        /// </summary>
+        /// <param name="modelName">Название мидели</param>
+        public void SaveModel(string modelName = "trainedModel.zip")
         {
-            // Save/persist the model to a .ZIP file to be loaded by the PredictionEnginePool
-            MlContext.Model.Save(_mlModel, null, mlnetModelFilePath);
+            var modelPath = Path.Combine(_modelsDirectory, modelName);
+            
+            if(File.Exists(modelPath))
+                File.Delete(modelPath);
+            
+            _mlContext.Model.Save(_mlModel, null, modelPath);
         }
         
-        public void LoadModel(string mlnetModelFilePath)
+        /// <summary>
+        /// Загрузка модели
+        /// </summary>
+        /// <param name="modelName">Название мидели</param>
+        /// <exception cref="Exception">Ошабка отсутствия модели</exception>
+        public void LoadModel(string modelName)
         {
-            // Save/persist the model to a .ZIP file to be loaded by the PredictionEnginePool
-            MlContext.Model.Save(_mlModel, null, mlnetModelFilePath);
+            var modelPath = Path.Combine(_modelsDirectory, modelName);
+            if (!File.Exists(modelPath))
+                throw new Exception($"Не удалось найти.zip файл модели по пути: {modelPath}");
+            
+            _mlContext.Model.Save(_mlModel, null, modelPath);
         }
     }
 }

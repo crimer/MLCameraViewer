@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using CameraViewer.MlNet.DataModels;
+using CameraViewer.MlNet.DataModels.TinyYolo;
 using Microsoft.ML;
 
 namespace CameraViewer.MlNet
@@ -7,26 +8,22 @@ namespace CameraViewer.MlNet
     public class Predictor
     {
         private readonly Trainer _trainer;
-        private MLContext _mLContext;
-        private PredictionEngine<ImageInputData, ImagePrediction> _predictionEngine;
+        private readonly PredictionEngine<ImageInputData, TinyYoloPrediction> _predictionEngine;
 
         public Predictor(Trainer trainer)
         {
             _trainer = trainer;
-            _mLContext = trainer.MlContext;
-            _mLContext = new MLContext();
-            _predictionEngine = _mLContext.Model.CreatePredictionEngine<ImageData, ImagePrediction>(trainedModel);
+            _predictionEngine = GetPredictionEngine<TinyYoloPrediction>();
         }
 
-        public PredictionEngine<ImageInputData, T> GetPredictionEngine<T>() where T : class, IOnnxObjectPrediction, new()
+        private PredictionEngine<ImageInputData, T> GetPredictionEngine<T>() where T : class, IOnnxObjectPrediction, new()
         {
-            return MlContext.Model.CreatePredictionEngine<ImageInputData, T>(_mlModel);
+            return _trainer.MlContext.Model.CreatePredictionEngine<ImageInputData, T>(_trainer.MlModel);
         }
         
-        public ImagePrediction Predict(Bitmap image)
+        public IOnnxObjectPrediction Predict(Bitmap image)
         {
-            tinyYoloPredictionEngine.Predict(imageInputData);
-            return _predictionEngine.Predict(new ImageData() { Image = image });
+            return _predictionEngine.Predict(new ImageInputData() { Image = image });
         }
     }
 }

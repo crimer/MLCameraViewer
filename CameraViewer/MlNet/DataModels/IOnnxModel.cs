@@ -2,7 +2,7 @@
 {
     public interface IOnnxModel
     {
-        string ModelPath { get; }
+        string ModelName { get; }
 
         // To check Model input and output parameter names, you can
         // use tools like Netron: https://github.com/lutzroeder/netron
