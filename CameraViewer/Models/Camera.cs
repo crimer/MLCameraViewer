@@ -2,6 +2,7 @@
 using System.Windows.Media.Imaging;
 using CameraViewer.Services;
 using GalaSoft.MvvmLight;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CameraViewer.Models
 {
@@ -30,7 +31,7 @@ namespace CameraViewer.Models
             Id = Guid.NewGuid();
             Name = selectedCamera.CameraName;
             MonikerString = selectedCamera.CameraMonikerString;
-            Handler = new CameraHandler();
+            Handler = App.ServiceProvider.GetRequiredService<CameraHandler>();
         }
     }
 }

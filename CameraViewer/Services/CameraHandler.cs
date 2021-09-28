@@ -29,24 +29,27 @@ namespace CameraViewer.Services
         private Camera _camera;
         private IVideoSource _videoSource;
         private OnnxOutputParser outputParser;
-        private PredictionEngine<ImageInputData, TinyYoloPrediction> tinyYoloPredictionEngine;
-        private static readonly string modelsDirectory = Path.Combine(Environment.CurrentDirectory, @"MlNet\OnnxModels");
+        private readonly PredictionEngine<ImageInputData, TinyYoloPrediction> _predictionEngine;
 
-        public CameraHandler()
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="predictor">Предсказатель</param>
+        public CameraHandler(Predictor predictor)
         {
-            LoadModel();
+            _predictionEngine = predictor.GetPredictionEngine<TinyYoloPrediction>();
         }
         
-        private void LoadModel()
-        {
-            var tinyYoloModel = new TinyYoloModel(Path.Combine(modelsDirectory, "TinyYolo2_model.onnx"));
-            var modelConfigurator = new OnnxModelConfigurator(tinyYoloModel);
-
-            outputParser = new OnnxOutputParser(tinyYoloModel);
-            // var transformer = modelConfigurator.MlContext.Model.Load(Path.Combine(modelsDirectory, "model2.zip"), out var scheeme);
-            tinyYoloPredictionEngine = modelConfigurator.GetMlNetPredictionEngine<TinyYoloPrediction>();
-            // tinyYoloPredictionEngine = modelConfigurator.MlContext.Model.CreatePredictionEngine<ImageInputData, TinyYoloPrediction>(transformer, scheeme);
-        }
+        // private void LoadModel()
+        // {
+        //     var tinyYoloModel = new TinyYoloModel(Path.Combine(modelsDirectory, "TinyYolo2_model.onnx"));
+        //     var modelConfigurator = new OnnxModelConfigurator(tinyYoloModel);
+        //
+        //     outputParser = new OnnxOutputParser(tinyYoloModel);
+        //     // var transformer = modelConfigurator.MlContext.Model.Load(Path.Combine(modelsDirectory, "model2.zip"), out var scheeme);
+        //     tinyYoloPredictionEngine = modelConfigurator.GetMlNetPredictionEngine<TinyYoloPrediction>();
+        //     // tinyYoloPredictionEngine = modelConfigurator.MlContext.Model.CreatePredictionEngine<ImageInputData, TinyYoloPrediction>(transformer, scheeme);
+        // }
         
         public async Task Connect(Camera camera)
         {
@@ -98,7 +101,7 @@ namespace CameraViewer.Services
 
         public List<BoundingBox> DetectObjectsUsingModel(ImageInputData imageInputData)
         {
-            var label = tinyYoloPredictionEngine.Predict(imageInputData);
+            var label = _predictionEngine.Predict(imageInputData);
             var labels = label?.PredictedLabels;
             if (labels.IsNullOrEmpty())
                 return new List<BoundingBox>();

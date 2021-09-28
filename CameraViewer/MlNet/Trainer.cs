@@ -5,19 +5,19 @@ using Microsoft.ML.Transforms.Image;
 
 namespace CameraViewer.MlNet
 {
-    public class OnnxModelConfigurator
+    public class Trainer
     {
         public MLContext MlContext;
         private readonly ITransformer _mlModel;
 
-        public OnnxModelConfigurator(IOnnxModel onnxModel)
+        public Trainer(IOnnxModel onnxModel)
         {
             MlContext = new MLContext();
             // _mlModel = _mlContext.Model.Load(@"C:\Users\shevn\Desktop\CameraViewer\CameraViewer\bin\Debug\net472\MlNet\OnnxModels\model.zip", out var modelSchema);
-            _mlModel = SetupMlNetModel(onnxModel);
+            // _mlModel = SetupMlNetModel(onnxModel);
         }
 
-        private ITransformer SetupMlNetModel(IOnnxModel onnxModel)
+        public ITransformer SetupModel(IOnnxModel onnxModel)
         {
             var dataView = MlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
             
@@ -45,9 +45,13 @@ namespace CameraViewer.MlNet
             return mlNetModel;
         }
 
+        public void SaveModel(string mlnetModelFilePath)
+        {
+            // Save/persist the model to a .ZIP file to be loaded by the PredictionEnginePool
+            MlContext.Model.Save(_mlModel, null, mlnetModelFilePath);
+        }
         
-
-        public void SaveMLNetModel(string mlnetModelFilePath)
+        public void LoadModel(string mlnetModelFilePath)
         {
             // Save/persist the model to a .ZIP file to be loaded by the PredictionEnginePool
             MlContext.Model.Save(_mlModel, null, mlnetModelFilePath);

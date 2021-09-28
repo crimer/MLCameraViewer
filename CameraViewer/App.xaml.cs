@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using CameraViewer.Configuration;
 using CameraViewer.Database;
+using CameraViewer.MlNet;
 using CameraViewer.Pages.Home;
 using CameraViewer.Repositories.ClickHouse;
 using CameraViewer.Repositories.Redis;
@@ -47,6 +48,16 @@ namespace CameraViewer
  
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
+#if DEBUG
+            ServiceProvider
+                .GetRequiredService<Trainer>()
+                .SetupModel();
+#elif
+            ServiceProvider
+                .GetRequiredService<Trainer>()
+                .SetupModel();
+#endif
+            
             var mainWindow = new HomeWindow();
             mainWindow.Show();
         }
@@ -65,6 +76,7 @@ namespace CameraViewer
             
             services.AddSingleton<HomeVM>();
             services.AddSingleton<CameraService>();
+            services.AddSingleton<CameraHandler>();
             
             services.AddSingleton<RedisDbProvider>();
             services.AddSingleton<ClickHouseDbProvider>();
@@ -72,6 +84,10 @@ namespace CameraViewer
             services.AddSingleton<RedisRepository>();
             services.AddSingleton<ClickHouseMetricRepository>();
             services.AddSingleton<ScriptsProvider>();
+            
+            services.AddSingleton<Predictor>();
+            services.AddSingleton<Drawer>();
+            services.AddSingleton<Trainer>();
         }
     }
 }

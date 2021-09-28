@@ -20,15 +20,8 @@ namespace CameraViewer.Pages.Home
     /// </summary>
     public class HomeVM :  ObservableObject
     {
-        private BitmapImage _image;
-        private string _ipCameraUrl;
-        private bool _isDesktopSource;
-        private bool _isIpCameraSource;
-        private bool _isWebcamSource;
-
         public ObservableCollection<Camera> CamerasCollection { get; set; }
         private readonly CreateFrameVM _createFrameVM;
-        private readonly AlertDialog _alertDialog;
         private readonly CreateFrameDialog _createFrameDialog;
         private bool _frameCreationParameterResult;
         public ObservableCollection<WebCameraInfo> WebCameraCollections { get; set; }
@@ -56,7 +49,6 @@ namespace CameraViewer.Pages.Home
             ConnectToCameraCommand = new RelayCommand<object>(ConnectToCamera);
             DisconnectToCameraCommand = new RelayCommand<object>(DisconnectToCamera);
 
-            _alertDialog = new AlertDialog();
             _createFrameVM = new CreateFrameVM(WebCameraCollections);
             _createFrameDialog = new CreateFrameDialog
             {
