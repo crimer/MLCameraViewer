@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CameraViewer.MlNet;
@@ -37,22 +38,32 @@ namespace CameraViewer.Components
             set { SetValue(CameraProperty, value); }
         }
         
-        private readonly Predictor _predictor;
+        public static readonly DependencyProperty RemoveCameraProperty =
+            DependencyProperty.Register(
+                "RemoveCamera",
+                typeof(ICommand),
+                typeof(CameraFrame),
+                new UIPropertyMetadata(null));
+        public ICommand RemoveCamera
+        {
+            get { return (ICommand)GetValue(RemoveCameraProperty); }
+            set { SetValue(RemoveCameraProperty, value); }
+        }
+        
+        private readonly MlAccessor _mlAccessor;
         private readonly ILogger<CameraFrame> _logger;
         
-        private OnnxOutputParser outputParser;
         private CancellationTokenSource _cameraCancellationToken;
         private VideoCapture _capture;
-        // private readonly PredictionEngine<ImageInputData, TinyYoloPrediction> _predictionEngine;
+        private readonly PredictionEngine<ImageInputData, TinyYoloPrediction> _predictionEngine;
 
 
         public CameraFrame()
         {
             InitializeComponent();
-            _predictor = App.ServiceProvider.GetRequiredService<Predictor>();
+            _mlAccessor = App.ServiceProvider.GetRequiredService<MlAccessor>();
             _logger = App.ServiceProvider.GetRequiredService<ILogger<CameraFrame>>();
-            // Создавать 
-            outputParser = new OnnxOutputParser();
+            _predictionEngine = _mlAccessor.Predictor.GetPredictionEngine<TinyYoloPrediction>();
         }
 
         /// <summary>
@@ -114,6 +125,31 @@ namespace CameraViewer.Components
                 });
             }
         }
+        
+        /// <summary>
+        /// Обнаружение объектов на фрейме
+        /// </summary>
+        /// <param name="bitmap">Фрейм</param>
+        /// <returns>Коллекция найденных объектов</returns>
+        private List<BoundingBox> DetectObjectsUsingModel(Bitmap bitmap)
+        {
+            try
+            {
+                var label = _mlAccessor.Predictor.Predict(_predictionEngine, bitmap);
+                var labels = label?.PredictedLabels;
+                if (labels.IsNullOrEmpty())
+                    return new List<BoundingBox>();
+            
+                var boundingBoxes = _mlAccessor.OnnxOutputParser.ParseOutputs(labels);
+                var filteredBoxes = _mlAccessor.OnnxOutputParser.FilterBoundingBoxes(boundingBoxes, 5, 0.5f);
+                return filteredBoxes;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Во время нахождения объектов на камере произошла ошибка: {ex}");
+                return new List<BoundingBox>();
+            }
+        }
 
         private void DrawOverlays(List<BoundingBox> filteredBoxes, double originalHeight, double originalWidth)
         {
@@ -150,7 +186,9 @@ namespace CameraViewer.Components
                     Margin = new Thickness(x + 4, y + 4, 0, 0),
                     Text = box.Description,
                     FontWeight = FontWeights.Bold,
+                    FontSize = 25,
                     Width = 126,
+                    Foreground = new SolidColorBrush(Colors.White),
                     Height = 21,
                     TextAlignment = TextAlignment.Center
                 };
@@ -169,31 +207,6 @@ namespace CameraViewer.Components
             }
         }
 
-        /// <summary>
-        /// Обнаружение объектов на фрейме
-        /// </summary>
-        /// <param name="bitmap">Фрейм</param>
-        /// <returns>Коллекция найденных объектов</returns>
-        private List<BoundingBox> DetectObjectsUsingModel(Bitmap bitmap)
-        {
-            try
-            {
-                var label = _predictor.Predict(bitmap);
-                var labels = label?.PredictedLabels;
-                if (labels.IsNullOrEmpty())
-                    return new List<BoundingBox>();
-            
-                var boundingBoxes = outputParser.ParseOutputs(labels);
-                var filteredBoxes = outputParser.FilterBoundingBoxes(boundingBoxes, 5, 0.5f);
-                return filteredBoxes;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Во время нахождения объектов на камере произошла ошибка: {ex}");
-                return new List<BoundingBox>();
-            }
-        }
-        
         /// <summary>
         /// Отключиться от камеры
         /// </summary>
@@ -217,7 +230,7 @@ namespace CameraViewer.Components
         private void OnDisconnectClick(object sender, RoutedEventArgs e)
         {
             Disconnect();
-            // CamerasCollection.Remove(camera);
+            RemoveCamera?.Execute(Camera);
         }
     }
 }

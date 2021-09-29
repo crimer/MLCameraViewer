@@ -50,8 +50,8 @@ namespace CameraViewer
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
             ServiceProvider
-                .GetRequiredService<Trainer>()
-                .SetupModel(new TinyYoloModel("TinyYolo2_model.onnx"));
+                .GetRequiredService<MlAccessor>()
+                .SetupModel();
 
             var mainWindow = ServiceProvider.GetRequiredService<HomeWindow>();
             mainWindow.Show();
@@ -84,6 +84,7 @@ namespace CameraViewer
             services.AddSingleton<Predictor>();
             services.AddSingleton<Drawer>();
             services.AddSingleton<Trainer>();
+            services.AddSingleton<MlAccessor>();
         }
     }
 }

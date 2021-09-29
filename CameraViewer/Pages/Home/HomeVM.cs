@@ -51,8 +51,7 @@ namespace CameraViewer.Pages.Home
             WebCameraCollections = new ObservableCollection<WebCameraInfo>(_cameraService.GetCameras());
             
             OpenCreateFrameDialogCommand = new RelayCommand(OpenCreateFrameDialog);
-            // ConnectToCameraCommand = new RelayCommand<object>(ConnectToCamera);
-            // DisconnectToCameraCommand = new RelayCommand<object>(DisconnectToCamera);
+            DisconnectToCameraCommand = new RelayCommand<object>(DisconnectToCamera);
 
             _createFrameVM = new CreateFrameVM(WebCameraCollections);
             _createFrameDialog = new CreateFrameDialog
@@ -60,20 +59,13 @@ namespace CameraViewer.Pages.Home
                 DataContext = _createFrameVM,
             };
         }
-        
-        // private void DisconnectToCamera(object obj)
-        // {
-        //     var camera = (Camera)obj;
-        //     // camera.Handler.Disconnect();
-        //     CamerasCollection.Remove(camera);
-        // }
-        //
-        // private void ConnectToCamera(object obj)
-        // {
-        //     var camera = (Camera)obj;
-        //     camera.Handler.Connect(camera);
-        // }
-        
+
+        private void DisconnectToCamera(object obj)
+        {
+            var camera = (Camera) obj;
+            CamerasCollection.Remove(camera);
+        }
+
         /// <summary>
         /// Открытие диалога создания фрейма
         /// </summary>

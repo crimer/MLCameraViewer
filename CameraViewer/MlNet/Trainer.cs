@@ -23,7 +23,7 @@ namespace CameraViewer.MlNet
 
         public ITransformer SetupModel(IOnnxModel onnxModel)
         {
-            var onnxModelPath = Path.Combine(_modelsDirectory, "TinyYolo2_model.onnx");
+            var onnxModelPath = Path.Combine(_modelsDirectory, onnxModel.ModelName);
             
             var dataView = _mlContext.Data.LoadFromEnumerable(new List<ImageInputData>());
             
