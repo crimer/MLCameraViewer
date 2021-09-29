@@ -3,12 +3,12 @@
     public class WebCameraInfo
     {
         public string CameraName { get; }
-        public string CameraMonikerString { get; }
+        public int CameraIndex { get; }
 
-        public WebCameraInfo(string cameraName, string cameraMonikerString)
+        public WebCameraInfo(string cameraName, int cameraIndex)
         {
             CameraName = cameraName;
-            CameraMonikerString = cameraMonikerString;
+            CameraIndex = cameraIndex;
         }
     }
 }

@@ -49,9 +49,9 @@ namespace CameraViewer
  
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
-            // ServiceProvider
-            //     .GetRequiredService<Trainer>()
-            //     .SetupModel(new TinyYoloModel("TinyYolo2_model.onnx"));
+            ServiceProvider
+                .GetRequiredService<Trainer>()
+                .SetupModel(new TinyYoloModel("TinyYolo2_model.onnx"));
 
             var mainWindow = ServiceProvider.GetRequiredService<HomeWindow>();
             mainWindow.Show();
@@ -73,7 +73,6 @@ namespace CameraViewer
             services.AddSingleton<HomeWindow>();
             
             services.AddSingleton<CameraService>();
-            services.AddSingleton<CameraHandler>();
             
             services.AddSingleton<RedisDbProvider>();
             services.AddSingleton<ClickHouseDbProvider>();

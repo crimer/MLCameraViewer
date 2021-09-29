@@ -15,7 +15,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
       <PackageReference Include="ClickHouse.Ado" Version="1.4.0" />
       <PackageReference Include="FluentResults" Version="2.5.0" />
       <PackageReference Include="Hompus.VideoInputDevices" Version="0.5.0" />

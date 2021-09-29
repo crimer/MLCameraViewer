@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Windows.Media.Imaging;
-using CameraViewer.Services;
 using GalaSoft.MvvmLight;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CameraViewer.Models
 {
@@ -18,11 +16,10 @@ namespace CameraViewer.Models
         public BitmapImage BitmapImage { get => _bitmapImage; set { Set(ref _bitmapImage, value); } }
         
         private bool _isRecording;
-        public bool IsRecording { get => _isRecording; set { Set(ref _isRecording, value); } }
-        public string MonikerString { get; set; }
-        public CameraHandler Handler { get; private set; }
+        public int CameraIndex { get; set; }
+        // public CameraHandler Handler { get; private set; }
 
-        public static int Index;
+        // public static int Index;
 
         /// <summary>
         /// Конструктор
@@ -32,8 +29,12 @@ namespace CameraViewer.Models
         {
             Id = Guid.NewGuid();
             Name = selectedCamera.CameraName;
-            MonikerString = selectedCamera.CameraMonikerString;
-            Handler = App.ServiceProvider.GetRequiredService<CameraHandler>();
+            CameraIndex = selectedCamera.CameraIndex;
+        }
+
+        public Camera()
+        {
+            
         }
     }
 }
