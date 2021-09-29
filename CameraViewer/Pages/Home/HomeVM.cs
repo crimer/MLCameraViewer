@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using CameraViewer.Dialogs.AlertDialog;
@@ -28,9 +29,13 @@ namespace CameraViewer.Pages.Home
         public ICommand OpenCreateFrameDialogCommand { get; private set; }
         public ICommand ConnectToCameraCommand { get; private set; }
         public ICommand DisconnectToCameraCommand { get; private set; }
-   
+        public HomeWindow View { get; set; }
+
         private readonly CameraService _cameraService;
         private readonly ILogger<HomeVM> _logger;
+        
+        private Image _image;
+        private Canvas _canvas;
 
         /// <summary>
         /// Конструктор

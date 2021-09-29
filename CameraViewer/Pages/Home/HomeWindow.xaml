@@ -44,11 +44,6 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         
-                        <!-- Camera Items -->
-                                    <!-- MaxHeight="450" -->
-                                    <!-- MaxWidth="600" -->
-                                    <!-- MinHeight="200" -->
-                                    <!-- MinWidth="400" -->
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <GroupBox
@@ -89,7 +84,7 @@
                                                     <RowDefinition Height="*" />
                                                 </Grid.RowDefinitions>
                                                 <Image x:Name="WebCamImage" Grid.Row="0" Source="{Binding BitmapImage}"/>
-                                                <Canvas Grid.Row="0" x:Name="WebCamCanvas"  Width="{Binding Path=ActualWidth, ElementName=WebCamImage}"/>
+                                                <!-- <Canvas x:Name="WebCamCanvas"  Grid.Row="0" Width="{Binding Path=ActualWidth, ElementName=WebCamImage}" /> -->
                                             </Grid>
                                         </Border>
         

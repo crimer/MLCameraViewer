@@ -22,6 +22,8 @@ namespace CameraViewer.Models
         public string MonikerString { get; set; }
         public CameraHandler Handler { get; private set; }
 
+        public static int Index;
+
         /// <summary>
         /// Конструктор
         /// </summary>

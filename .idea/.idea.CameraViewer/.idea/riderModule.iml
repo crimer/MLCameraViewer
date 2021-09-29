@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../.." />
+    <content url="file://$USER_HOME$/.nuget/packages/microsoft.ml.onnxruntime/1.9.0/runtimes/win-x64/native/onnxruntime.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/microsoft.ml.onnxruntime/1.9.0/runtimes/win-x64/native/onnxruntime_providers_shared.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/opencvsharp4.runtime.win/4.5.3.20210817/runtimes/win-x64/native/OpenCvSharpExtern.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/opencvsharp4.runtime.win/4.5.3.20210817/runtimes/win-x64/native/opencv_videoio_ffmpeg453_64.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/opencvsharp4.runtime.win/4.5.3.20210817/runtimes/win-x86/native/OpenCvSharpExtern.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/opencvsharp4.runtime.win/4.5.3.20210817/runtimes/win-x86/native/opencv_videoio_ffmpeg453.dll" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using AForge.Video.DirectShow;
 using CameraViewer.Models;
+using Hompus.VideoInputDevices;
 
 namespace CameraViewer.Services
 {
@@ -27,11 +29,18 @@ namespace CameraViewer.Services
         /// </summary>
         /// <returns>Коллекция камер</returns>
         public List<WebCameraInfo> GetCameras()
-        { 
+        {
             var webCameraInfos = new List<WebCameraInfo>();
 
-            foreach (FilterInfo camera in _videoDevicesList)
-                webCameraInfos.Add(new WebCameraInfo(camera.Name, camera.MonikerString));
+            // foreach (FilterInfo camera in _videoDevicesList)
+            //     webCameraInfos.Add(new WebCameraInfo(camera.Name, camera.MonikerString));
+            
+            using (var sde = new SystemDeviceEnumerator())
+            {
+                var devices = sde.ListVideoInputDevice();
+                var index = devices.First(d => d.Value == "Cam Link 4K").Key;
+                // capture = new VideoCapture(index, VideoCapture.API.DShow);
+            }
             
             return webCameraInfos;
         }

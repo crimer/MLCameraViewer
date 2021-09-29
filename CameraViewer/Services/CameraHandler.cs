@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Threading;
-using AForge.Video;
-using AForge.Video.DirectShow;
+using System.Windows;
 using CameraViewer.MlNet;
 using CameraViewer.MlNet.DataModels;
 using CameraViewer.MlNet.DataModels.TinyYolo;
@@ -14,10 +14,13 @@ using CameraViewer.Models;
 using CameraViewer.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
 using Brush = System.Drawing.Brush;
 using Color = System.Drawing.Color;
 using FontStyle = System.Drawing.FontStyle;
 using Pen = System.Drawing.Pen;
+using Point = System.Drawing.Point;
 
 namespace CameraViewer.Services
 {
@@ -26,9 +29,12 @@ namespace CameraViewer.Services
         private readonly Predictor _predictor;
         private readonly ILogger<CameraHandler> _logger;
         private Camera _camera;
-        private IVideoSource _videoSource;
         private OnnxOutputParser outputParser;
+        private CancellationTokenSource _cameraCancellationToken;
         private readonly PredictionEngine<ImageInputData, TinyYoloPrediction> _predictionEngine;
+
+        private Mat _mat = new Mat();
+        private VideoCapture _capture;
 
         /// <summary>
         /// Конструктор
@@ -45,17 +51,12 @@ namespace CameraViewer.Services
         /// Подключиться к камере
         /// </summary>
         /// <param name="camera">Камера</param>
-        public async Task Connect(Camera camera)
+        public void Connect(Camera camera)
         {
-            await Task.Run(() =>
-            {
-                _camera = camera;
-                _videoSource = new VideoCaptureDevice(camera.MonikerString);
-                _videoSource.NewFrame += VideoSourceOnNewFrame;
-                _videoSource.Start();
-            });
+            _cameraCancellationToken = new CancellationTokenSource();
+            Task.Run(() => CaptureCamera(_cameraCancellationToken.Token), _cameraCancellationToken.Token);
         }
-        
+
         /// <summary>
         /// Отключиться от камеры
         /// </summary>
@@ -63,38 +64,47 @@ namespace CameraViewer.Services
         {
             try
             {
-                if(_videoSource == null)
-                    return;
-                
-                _videoSource.SignalToStop();
-                _videoSource.NewFrame -= VideoSourceOnNewFrame;
+                _cameraCancellationToken?.Cancel();
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Во отключения от камеры произошла ошибка: {ex}");
             }
         }
-        
+
         /// <summary>
         /// Получение фрейма
         /// </summary>
-        /// <param name="sender">Отправитель</param>
-        /// <param name="eventArgs">Событие получения фрейма</param>
-        private void VideoSourceOnNewFrame(object sender, NewFrameEventArgs eventArgs)
+        /// <param name="token">Токен отмены</param>
+        private async Task CaptureCamera(CancellationToken token)
         {
             try
             {
-                using (var bitmap = (Bitmap) eventArgs.Frame.Clone())
+                if (_capture == null)
+                    _capture = new VideoCapture();
+
+                _capture.Open(0);
+                if (_capture.IsOpened())
                 {
-                    var bi = bitmap.ToBitmapImage();
-                    bi.Freeze();
-                        
-                    Dispatcher.CurrentDispatcher.Invoke(() =>
+                    while (!token.IsCancellationRequested)
                     {
-                        _camera.BitmapImage = bi;
-                        ParseWebCamFrame(bitmap);
-                    });
-                
+                        _capture.Read(_mat);
+                        if(_mat == null)
+                            break;
+                        
+                        using (MemoryStream memoryStream = _capture.RetrieveMat().Flip(FlipMode.Y).ToMemoryStream())
+                        {
+                            await Application.Current.Dispatcher.InvokeAsync(() =>
+                            {
+                                _camera.BitmapImage = BitmapConverter.ToBitmap(_mat).ToBitmapImage();
+                            });
+
+                            var bitmapImage = new Bitmap(memoryStream);
+
+                            await ParseWebCamFrame(bitmapImage, token);
+                        }
+                    }
+                    _capture.Release();
                 }
             }
             catch (Exception ex)
@@ -103,28 +113,20 @@ namespace CameraViewer.Services
             }
         }
 
-        /// <summary>
-        /// Парсинг фрейма с камеры
-        /// </summary>
-        /// <param name="bitmap">Фрейм</param>
-        private void ParseWebCamFrame(Bitmap bitmap)
+        private async Task ParseWebCamFrame(Bitmap bitmap, CancellationToken token)
         {
-            try
+            var filteredBoxes = DetectObjectsUsingModel(bitmap);
+
+            if (!token.IsCancellationRequested)
             {
-                var filteredBoxes = DetectObjectsUsingModel(bitmap);
-                if(filteredBoxes.IsNullOrEmpty())
-                    filteredBoxes = new List<BoundingBox>();
-                
-                // Application.Current.Dispatcher.Invoke(() =>
-                // {
-                DrawOverlays(filteredBoxes, _camera.BitmapImage.Height, _camera.BitmapImage.Width);
-                // });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"В парсинге фрейма камеры произошла ошибка: {ex}");
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    // DrawOverlays(filteredBoxes, WebCamImage.ActualHeight, WebCamImage.ActualWidth);
+                    DrawOverlays(filteredBoxes, _camera.BitmapImage.Height, _camera.BitmapImage.Width);
+                });
             }
         }
+
 
         /// <summary>
         /// Обнаружение объектов на фрейме
