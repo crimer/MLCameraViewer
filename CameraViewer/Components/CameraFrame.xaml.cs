@@ -25,6 +25,8 @@ namespace CameraViewer.Components
 {
     public partial class CameraFrame : UserControl
     {
+        #region ComponentProps
+        
         public static readonly DependencyProperty CameraProperty = 
             DependencyProperty.Register(
             "Camera",
@@ -50,14 +52,17 @@ namespace CameraViewer.Components
             set { SetValue(RemoveCameraProperty, value); }
         }
         
+        #endregion
+        
         private readonly MlAccessor _mlAccessor;
         private readonly ILogger<CameraFrame> _logger;
-        
+        private readonly PredictionEngine<ImageInputData, TinyYoloPrediction> _predictionEngine;
         private CancellationTokenSource _cameraCancellationToken;
         private VideoCapture _capture;
-        private readonly PredictionEngine<ImageInputData, TinyYoloPrediction> _predictionEngine;
 
-
+        /// <summary>
+        /// Конструктор
+        /// </summary>
         public CameraFrame()
         {
             InitializeComponent();
@@ -70,13 +75,17 @@ namespace CameraViewer.Components
         /// Подключиться к камере
         /// </summary>
         /// <param name="camera">Камера</param>
-        public async void Connect(Camera camera)
+        public void Connect(Camera camera)
         {
             _cameraCancellationToken = new CancellationTokenSource();
             Task.Run(() => CaptureCamera(camera, _cameraCancellationToken.Token), _cameraCancellationToken.Token);
         }
         
-        
+        /// <summary>
+        /// Обработать видеоряд с камеры
+        /// </summary>
+        /// <param name="camera">Камера</param>
+        /// <param name="token">Токен отмены</param>
         private async Task CaptureCamera(Camera camera, CancellationToken token)
         {
             if (_capture == null)
@@ -105,7 +114,7 @@ namespace CameraViewer.Components
 
                         var bitmapImage = new Bitmap(memoryStream);
 
-                        await ParseWebCamFrame(bitmapImage, token);
+                        await DetectObjectsOnFrame(bitmapImage, token);
                     }
                 }
 
@@ -113,9 +122,14 @@ namespace CameraViewer.Components
             }
         }
 
-        private async Task ParseWebCamFrame(Bitmap bitmapImage, CancellationToken token)
+        /// <summary>
+        /// Обнарежить объекты на ферйме
+        /// </summary>
+        /// <param name="frame">Фрейм</param>
+        /// <param name="token">Токен отмены</param>
+        private async Task DetectObjectsOnFrame(Bitmap frame, CancellationToken token)
         {
-            var filteredBoxes = DetectObjectsUsingModel(bitmapImage);
+            var filteredBoxes = DetectObjectsUsingModel(frame);
 
             if (!token.IsCancellationRequested)
             {
@@ -135,8 +149,7 @@ namespace CameraViewer.Components
         {
             try
             {
-                var label = _mlAccessor.Predictor.Predict(_predictionEngine, bitmap);
-                var labels = label?.PredictedLabels;
+                var labels = _mlAccessor.Predictor.Predict(_predictionEngine, bitmap)?.PredictedLabels;
                 if (labels.IsNullOrEmpty())
                     return new List<BoundingBox>();
             
@@ -151,6 +164,12 @@ namespace CameraViewer.Components
             }
         }
 
+        /// <summary>
+        /// Нарисовать найденные объекты на Canvas
+        /// </summary>
+        /// <param name="filteredBoxes">Найденные объекты</param>
+        /// <param name="originalHeight">Начальная высота</param>
+        /// <param name="originalWidth">Начальная ширина</param>
         private void DrawOverlays(List<BoundingBox> filteredBoxes, double originalHeight, double originalWidth)
         {
             WebCamCanvas.Children.Clear();

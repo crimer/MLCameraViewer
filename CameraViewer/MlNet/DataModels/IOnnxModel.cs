@@ -13,7 +13,7 @@
         (float, float)[] Anchors { get; }
     }
 
-    public interface IOnnxObjectPrediction
+    public interface IOnnxPrediction
     {
         float[] PredictedLabels { get; set; }
     }

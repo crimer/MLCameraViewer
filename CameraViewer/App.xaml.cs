@@ -82,7 +82,6 @@ namespace CameraViewer
             services.AddSingleton<ScriptsProvider>();
             
             services.AddSingleton<Predictor>();
-            services.AddSingleton<Drawer>();
             services.AddSingleton<Trainer>();
             services.AddSingleton<MlAccessor>();
         }

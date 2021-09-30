@@ -7,20 +7,38 @@ using Microsoft.ML.Transforms.Image;
 
 namespace CameraViewer.MlNet
 {
+    /// <summary>
+    /// Тренер ML модели
+    /// </summary>
     public class Trainer
     {
         private readonly string _modelsDirectory = Path.Combine(Environment.CurrentDirectory, @"MlNet\OnnxModels");
         private MLContext _mlContext;
         private ITransformer _mlModel;
 
+        /// <summary>
+        /// Контекст ML.Net
+        /// </summary>
         public MLContext MlContext => _mlContext;
+        
+        /// <summary>
+        /// Трансформер
+        /// </summary>
         public ITransformer MlModel => _mlModel;
         
+        /// <summary>
+        /// Конструктор
+        /// </summary>
         public Trainer()
         {
             _mlContext = new MLContext();
         }
 
+        /// <summary>
+        /// КОнфигурация модели
+        /// </summary>
+        /// <param name="onnxModel">ONNX модель</param>
+        /// <returns>ML трансформер</returns>
         public ITransformer SetupModel(IOnnxModel onnxModel)
         {
             var onnxModelPath = Path.Combine(_modelsDirectory, onnxModel.ModelName);

@@ -2,7 +2,7 @@
 
 namespace CameraViewer.MlNet.DataModels.TinyYolo
 {
-    public class TinyYoloPrediction : IOnnxObjectPrediction
+    public class TinyYoloPrediction : IOnnxPrediction
     {
         [ColumnName("grid")]
         public float[] PredictedLabels { get; set; }
