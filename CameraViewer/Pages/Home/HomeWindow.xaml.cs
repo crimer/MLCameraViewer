@@ -8,7 +8,6 @@ namespace CameraViewer.Pages.Home
         {
             InitializeComponent();
             DataContext = homeVm;
-            homeVm.View = this;
         }
     }
 }

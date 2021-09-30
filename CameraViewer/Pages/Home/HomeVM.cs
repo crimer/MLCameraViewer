@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Net;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
-using CameraViewer.Dialogs.AlertDialog;
 using CameraViewer.Dialogs.CreateFrameDialog;
 using CameraViewer.Models;
 using CameraViewer.Services;
@@ -21,42 +17,34 @@ namespace CameraViewer.Pages.Home
     /// </summary>
     public class HomeVM :  ObservableObject
     {
-        public ObservableCollection<Camera> CamerasCollection { get; set; }
-        private readonly CreateFrameVM _createFrameVM;
+        private readonly CreateFrameVM _createFrameVm;
         private readonly CreateFrameDialog _createFrameDialog;
         private bool _frameCreationParameterResult;
-        public ObservableCollection<WebCameraInfo> WebCameraCollections { get; set; }
-        public ICommand OpenCreateFrameDialogCommand { get; private set; }
-        public ICommand ConnectToCameraCommand { get; private set; }
-        public ICommand DisconnectToCameraCommand { get; private set; }
-        public HomeWindow View { get; set; }
-
-        private readonly CameraService _cameraService;
         private readonly ILogger<HomeVM> _logger;
-        
-        private Image _image;
-        private Canvas _canvas;
+        public ObservableCollection<Camera> CamerasCollection { get; }
+        public ObservableCollection<WebCameraInfo> WebCameraCollections { get; }
+        public ICommand OpenCreateFrameDialogCommand { get; }
+        public ICommand DisconnectToCameraCommand { get; }
 
         /// <summary>
         /// Конструктор
         /// </summary>
-        /// <param name="cameraService">Сервис видео</param>
+        /// <param name="cameraService">Сервис камер</param>
         /// <param name="logger">Логгер</param>
         public HomeVM(CameraService cameraService, ILogger<HomeVM> logger)
         {
             _logger = logger;
-            _cameraService = cameraService;
 
             CamerasCollection = new ObservableCollection<Camera>();
-            WebCameraCollections = new ObservableCollection<WebCameraInfo>(_cameraService.GetCameras());
+            WebCameraCollections = new ObservableCollection<WebCameraInfo>(cameraService.GetCameras());
             
             OpenCreateFrameDialogCommand = new RelayCommand(OpenCreateFrameDialog);
             DisconnectToCameraCommand = new RelayCommand<object>(DisconnectToCamera);
 
-            _createFrameVM = new CreateFrameVM(WebCameraCollections);
+            _createFrameVm = new CreateFrameVM(WebCameraCollections);
             _createFrameDialog = new CreateFrameDialog
             {
-                DataContext = _createFrameVM,
+                DataContext = _createFrameVm,
             };
         }
 
@@ -73,7 +61,7 @@ namespace CameraViewer.Pages.Home
         {
             try
             {
-                var res = await DialogHost.Show(
+                await DialogHost.Show(
                     _createFrameDialog, 
                     "RootDialog", (sender, args) =>
                     {
@@ -84,7 +72,7 @@ namespace CameraViewer.Pages.Home
                 if(!_frameCreationParameterResult)
                     return;
                 
-                CamerasCollection.Add(new Camera(_createFrameVM.SelectedCamera));
+                CamerasCollection.Add(new Camera(_createFrameVm.SelectedCamera));
             }
             catch (Exception ex)
             {
